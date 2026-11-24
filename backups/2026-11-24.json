@@ -1,0 +1,148 @@
+[
+  {
+    "id": "WjPT40rpBw1WG4Ct",
+    "name": "Nightly backup of all workflows to GitHub",
+    "active": false,
+    "activeVersionId": null,
+    "createdAt": "2026-11-24T12:14:26.408Z",
+    "updatedAt": "2026-11-24T12:16:38.415Z",
+    "isArchived": false,
+    "versionId": "00733ab6-5928-46a4-93ed-7f2199f4b0d3",
+    "triggerCount": 0,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 2
+              }
+            ]
+          }
+        },
+        "id": "241f3720-675f-4c9f-8aa7-eb8646b77925",
+        "name": "Every night at 2am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "filters": {},
+          "requestOptions": {}
+        },
+        "id": "9041fe5b-b116-4ea2-874a-a1db21924e8e",
+        "name": "Get all workflows",
+        "type": "n8n-nodes-base.n8n",
+        "typeVersion": 1,
+        "position": [
+          240,
+          0
+        ],
+        "credentials": {
+          "n8nApi": {
+            "id": "cKaReO57vB4LwQNx",
+            "name": "n8n account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const date = new Date().toISOString().slice(0, 10);\nconst workflows = $input.all().map(i => i.json);\nreturn [{\n  json: {\n    date,\n    count: workflows.length,\n    path: `backups/${date}.json`,\n    content: JSON.stringify(workflows, null, 2)\n  }\n}];"
+        },
+        "id": "74aa56f3-fb0b-4e42-be10-04c225b44c65",
+        "name": "Bundle into one file",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          480,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "file",
+          "owner": "zadok-visuals",
+          "repository": "n8n-backups",
+          "filePath": "={{ $json.path }}",
+          "fileContent": "={{ $json.content }}",
+          "commitMessage": "=Backup {{ $json.date }} ({{ $json.count }} workflows)"
+        },
+        "id": "d1104be4-faaf-4648-a55b-6857d3dc9812",
+        "name": "Save to GitHub",
+        "type": "n8n-nodes-base.github",
+        "typeVersion": 1,
+        "position": [
+          720,
+          0
+        ],
+        "webhookId": "e158fe68-b9b4-44f3-8429-1dc682e59768",
+        "credentials": {
+          "githubApi": {
+            "id": "PN7ks0evDJ65E31v",
+            "name": "GitHub account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Every night at 2am": {
+        "main": [
+          [
+            {
+              "node": "Get all workflows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get all workflows": {
+        "main": [
+          [
+            {
+              "node": "Bundle into one file",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Bundle into one file": {
+        "main": [
+          [
+            {
+              "node": "Save to GitHub",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate"
+    },
+    "staticData": null,
+    "pinData": {},
+    "meta": {
+      "templateCredsSetupCompleted": true
+    },
+    "tags": [],
+    "shared": [
+      {
+        "role": "workflow:owner",
+        "workflowId": "WjPT40rpBw1WG4Ct",
+        "projectId": "4Mk796dbEVOwdHxV",
+        "createdAt": "2026-11-24T12:14:26.413Z",
+        "updatedAt": "2026-11-24T12:14:26.413Z"
+      }
+    ],
+    "activeVersion": null
+  }
+]
